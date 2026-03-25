@@ -208,4 +208,4 @@ with ui.row().style(center_style):
     # clearing
     clear_button = ui.button("clear", on_click=clear_experiments)
 
-ui.run(show=False, favicon='./images/penguin-suit.png')
+ui.run(show=False, favicon='penguin-suit.png')
