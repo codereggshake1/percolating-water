@@ -1,5 +1,20 @@
 from random import random
 
+def test_grid():
+    # Draw your test grid here
+
+    grid = create_grid(10)
+    randomly_open(grid, .65)
+    # grid = [[0, 0, 0, 1, 0, 0, 0],
+    #         [0, 0, 0, 1, 0, 0, 0],
+    #         [0, 0, 0, 1, 0, 0, 0],
+    #         [0, 1, 1, 1, 1, 1, 0],
+    #         [0, 1, 0, 1, 0, 1, 0],
+    #         [0, 1, 0, 1, 0, 1, 0],
+    #         [0, 1, 0, 1, 0, 1, 0]]
+    
+    return grid
+
 def create_grid(n: int) -> list[list[int]]:
     grid = [[0 for j in range(n)] for i in range(n)]
     return grid
