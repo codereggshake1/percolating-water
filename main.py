@@ -8,10 +8,10 @@ import grid
 # Variables
 # each element in this array is a tuple with these variables
 # (porosity, N, percolation proportion, closed contact count)
-# porosity               : probability of opening a cell in an NxN grid. indep. var.
-# N                      : grid side length. indep. var.
-# percolation proprotion : proportion of grids that successfully percolated
-# closed contact count   : the number of closed cells that were in contact with water, on average
+# porosity               : probability of opening a cell in an NxN grid. INPUT.
+# N                      : grid side length. INPUT.
+# percolation proprotion : proportion of grids that successfully percolated. OUTPUT.
+# closed contact count   : the number of closed cells that were in contact with water, on average. OUTPUT.
 results = []
 
 #####################
@@ -72,7 +72,6 @@ def clear_experiments():
 
 def plot_simulation():
     # use global vars to plot
-    # TODO: should i use sorted() or .sort()
     global results
     sorted_array = np.array( sorted(results, key=lambda t: t[0]) ).reshape((-1, 4))
     x = sorted_array[:, 0]
@@ -95,14 +94,6 @@ async def simulate():
     # handle simulate button click event
     # perform experiment for different values of p
     global results
-
-    # test_porosity = np.random.rand()
-    # test_N = 20
-    # test_percolation = np.random.rand()
-    # test_closed_count = np.random.randint(40, 120)
-    
-    # test_point = (test_porosity, test_N, test_percolation, test_closed_count)
-    # results.append(test_point)
     min_p = porosity_range.value['min']
     max_p = porosity_range.value['max']
 
@@ -112,11 +103,9 @@ async def simulate():
     async def work(p):
         # do the experiment
         nonlocal i
-        await experiment(20, p, 40)
+        await experiment(int(N_input.value), p, 40)
         i += 1
 
-    # tasks = [asyncio.create_task(work(p)) for p in plist]
-    # asyncio.gather(*tasks)
     simulate_button.disable()
     for p in plist:
         await work(p)
@@ -150,26 +139,40 @@ async def experiment(N: int, p: float, t: int):
 
 #####################
 # Rendering
-center_style = 'display: flex; justify-content: center; width: 100%;'
+center_style = 'display: flex; justify-content: center; width: 100%;' # attaching this style to a row centers all of its contents
+prange_low = .3
+prange_high = .7
 
-test_grid = grid.create_grid(20)
-grid.randomly_open(test_grid, .6)
+try:
+    test_grid = grid.test_grid()
+except:
+    test_grid = grid.create_grid(20)
+    grid.randomly_open(test_grid, .6)
+
 draw_grid(test_grid)
 
 ui.label() # padding
 ui.separator()
 ui.label() # padding
 
-ui.label("Porosity range:").style(center_style)
+sim_params_width = '40%'
+with ui.row().style('display: flex; justify-content: center; align-items: center; width: 100%;'):
+    with ui.column().style(f'width: {sim_params_width}'):
+        with ui.row().style('width: 100%;'):
+            N_input = ui.number(label="Grid side length (N)", placeholder="N", value=20, min=1, max=50, precision=0, step=1).style('width: 20%')
+            ui.label("N larger than 30 may crash and cause a refresh").style('color: gray; font-size: 12px;')
+        prange_label = ui.label(f"Porosity range: ({prange_low}, {prange_high})")
+
 ui.label() # padding
 
 # porosity range   
 with ui.row().style(center_style):
      
     porosity_range = ui.range(min=0, max=1, step=.01,
-                              value={'min': 0.3, 'max':.7})\
-                                .style('width: 40%')\
+                              value={'min': prange_low, 'max': prange_high})\
+                                .style(f'width: {sim_params_width}')\
                                 .props('label-always')
+    porosity_range.on_value_change(lambda: setattr(prange_label, 'text', f"Porosity range: ({porosity_range.value['min']}, {porosity_range.value['max']})"))
 
 # simulation button
 with ui.row().style(center_style):
@@ -195,12 +198,14 @@ with ui.row().style(center_style):
         ax.set_xlim(0, 1)
         ax.set_xlabel("Porosity")
         ax.set_ylabel("Watered Cells")
-        # ax.set_ylabel("hi")
         ax.set_title("Watered Closed Cells Count vs Porosity")
+
+with ui.row().style(center_style):
+    ui.label("Each data point is the result of repeating T times: step through a given NxN grid and porosity until no new cells are filled").style('color: gray; font-size: 12px;')
 
 # clear
 with ui.row().style(center_style):
     # clearing
     clear_button = ui.button("clear", on_click=clear_experiments)
 
-ui.run(show=False, favicon='penguin-suit.png')
+ui.run(show=False, favicon='./images/penguin-suit.png')
