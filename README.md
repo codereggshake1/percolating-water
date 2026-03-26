@@ -14,6 +14,9 @@ An NxN grid have cells that can start out either opened or closed, with probabil
 1. Install [NiceGUI](https://nicegui.io/).
 2. Run `python main.py`
 
+Here for a demo:
+https://water-percolation.up.railway.app/
+
 # Implementation
 - NiceGui
 - grid util (really slow)
