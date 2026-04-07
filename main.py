@@ -4,6 +4,7 @@ import numpy as np
 import asyncio
 import csv
 import grid
+import os
 
 #####################
 # Variables
