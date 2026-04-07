@@ -216,6 +216,7 @@ async def simulate():
         nonlocal i
         await experiment(int(N_input.value), p, 40, capture_salts=True)
         i += 1
+        await asyncio.sleep(0)
 
     simulate_button.disable()
     for p in plist:
