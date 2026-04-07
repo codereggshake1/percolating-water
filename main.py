@@ -372,4 +372,4 @@ with ui.row().style(center_style):
         download_button = ui.button("download results", on_click=download_results).style()
 
 port = int(os.environ.get("PORT", 10000))
-ui.run(host='0.0.0.0', port=port, favicon='./images/penguin-suit.png')
+ui.run(host='0.0.0.0', port=port, favicon='./penguin-suit.png')
