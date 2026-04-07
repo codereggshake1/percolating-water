@@ -246,7 +246,7 @@ async def experiment(N: int, p: float, t: int, capture_salts: bool=False):
         grid.randomly_open(g, p)
         grid.step_all(g, capture_salts=capture_salts)
 
-        percolates.append(grid.percolates(g))
+        percolates.append(any(g[N-1][col] > grid.OPEN for col in range(N)))
         counts.append(grid.count_contact(g))
         tdss.append(grid.lowest_bottom_tds(g))
 
@@ -373,5 +373,4 @@ with ui.row().style(center_style):
     with ui.element().style('flex: 1; display: flex; '):    
         download_button = ui.button("download results", on_click=download_results).style()
 
-port = int(os.environ.get("PORT", 10000))
-ui.run(host='0.0.0.0', port=port, favicon='./penguin-suit.png')
+ui.run(show=False, favicon='./penguin-suit.png')

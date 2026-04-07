@@ -22,16 +22,7 @@ def test_grid():
     return None
 
 def create_grid(n: int) -> list[list[int]]:
-    grid = []
-    for i in range(n):
-        row = []
-        # BEGIN TODO: build each row here. To add items to a list, use the .append() function: row.append(0).
-        for j in range(n):
-            row.append(CLOSED)
-        # END TODO
-        grid.append(row)
-    
-    return grid
+    return [[CLOSED for _ in range(n)] for _ in range(n)]
 
 def randomly_open(grid: list[list[int]], probability: float) -> int:
     # returns the number of cells opened
@@ -147,11 +138,63 @@ def step(grid: list[list[int]], capture_salts: bool=False) -> int:
 
     return newly_filled
 
+def _adjacent_indices(i: int, j: int, n: int):
+    # Order matches original step(): down, left, right, up.
+    if i + 1 < n:
+        yield (i + 1, j)
+    if j - 1 >= 0:
+        yield (i, j - 1)
+    if j + 1 < n:
+        yield (i, j + 1)
+    if i - 1 >= 0:
+        yield (i - 1, j)
+
+
 def step_all(grid: list[list[int]], capture_salts: bool=False):
-    newly_filled = step(grid, capture_salts)
-    while newly_filled > 0:
-        newly_filled = step(grid, capture_salts)
-    step(grid, capture_salts)
+    n = len(grid)
+    current_tds = get_current_tds(grid)
+    frontier: list[tuple[int, int]] = []
+
+    # Collect any already filled cells
+    for i in range(n):
+        for j in range(n):
+            if grid[i][j] > OPEN:
+                frontier.append((i, j))
+
+    # If nothing is filled yet, seed the top row.
+    if not frontier:
+        current_tds = MAX_TDS
+        for j in range(n):
+            if grid[0][j] == OPEN:
+                grid[0][j] = current_tds
+                frontier.append((0, j))
+
+    while frontier:
+        next_frontier: list[tuple[int, int]] = []
+        for i, j in frontier:
+            # Mark any closed neighbors as contacted and reduce TDS if capturing salts.
+            for ni, nj in _adjacent_indices(i, j, n):
+                if grid[ni][nj] == CLOSED and capture_salts:
+                    grid[ni][nj] = CONTAINED
+                    current_tds = max(0, current_tds - SELECTIVITY)
+
+            # Then fill adjacent open cells.
+            for ni, nj in _adjacent_indices(i, j, n):
+                if grid[ni][nj] == OPEN:
+                    grid[ni][nj] = current_tds
+                    next_frontier.append((ni, nj))
+
+        frontier = next_frontier
+
+    # If the final filled region touches closed neighbors, ensure they are counted too.
+    if capture_salts:
+        for i in range(n):
+            for j in range(n):
+                if grid[i][j] > OPEN:
+                    for ni, nj in _adjacent_indices(i, j, n):
+                        if grid[ni][nj] == CLOSED:
+                            grid[ni][nj] = CONTAINED
+
 
 def percolates(grid: list[list[int]]) -> bool:
     # find a path from any of the top filled rows to the filled bottom row
