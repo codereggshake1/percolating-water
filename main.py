@@ -260,7 +260,7 @@ async def experiment(N: int, p: float, t: int, capture_salts: bool=False):
 # Rendering
 center_style = 'display: flex; justify-content: center; width: 100%;' # attaching this style to a row centers all of its contents
 border_style = 'border: 1px solid black;'
-prange_low = .3
+prange_low = .5
 prange_high = .7
 
 # Grid drawing and interaction
